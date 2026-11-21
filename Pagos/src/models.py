@@ -1,3 +1,4 @@
+from database.py import engine
 from sqalchemy.orm import declarative_base
 from sqalchemy import Column, Integer, String, Float
 
@@ -5,13 +6,13 @@ Base = declarative_base()
 
 class ChargeRequests(Base):
     __table_name__ = "Charge Requests"
-    ChargeRequest_id = Column(Integer, primary_key=True)
-    session_id = Column(String, nullable=False)
-    buy_order = Column(String, nullable=False)
-    amount = Column(Float, nullable=False)
+    Charge_Request_Id = Column(Integer, primary_key=True)
+    Buy_Order = Column(String, nullable=False)
+    Charge = Column(Float, nullable=False)
 
-class RefundRequest(Base):
-    __table_name__ = "refund_requests"
-    RefundRequest_id = Column(Integer, primary_key=True)
-    token = Column(String, nullable=False)
-    amount = Column(Float, nullable=False)
+class RefundRequests(Base):
+    __table_name__ = "Refund Requests"
+    Refund_Request_Id = Column(Integer, primary_key=True)
+    Charge = Column(Float, nullable=False)
+
+Base.metadata.create_all(engine)

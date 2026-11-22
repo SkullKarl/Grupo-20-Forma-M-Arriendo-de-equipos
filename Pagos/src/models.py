@@ -1,18 +1,22 @@
-from database.py import engine
-from sqalchemy.orm import declarative_base
-from sqalchemy import Column, Integer, String, Float
+from sqlalchemy.orm import declarative_base
+from sqlalchemy import Column, Float, Integer, String
 
 Base = declarative_base()
 
 class ChargeRequests(Base):
-    __table_name__ = "Charge Requests"
-    Charge_Request_Id = Column(Integer, primary_key=True)
+    __tablename__ = "Charge Requests"
+    Charge_Request_Id = Column(Integer, primary_key=True, index=True)
+    Equipo_Id = Column(String, nullable=False)
     Buy_Order = Column(String, nullable=False)
     Charge = Column(Float, nullable=False)
+    Idempotency_Key = Column(String, unique=True, index=True, nullable=False)
+    Status = Column(String, nullable=False, default="PENDING")
+    Token = Column(String, nullable=True)
 
 class RefundRequests(Base):
-    __table_name__ = "Refund Requests"
-    Refund_Request_Id = Column(Integer, primary_key=True)
+    __tablename__ = "Refund Requests"
+    Refund_Request_Id = Column(Integer, primary_key=True, index=True)
+    Equipo_Id = Column(String, nullable=False)
     Charge = Column(Float, nullable=False)
-
-Base.metadata.create_all(engine)
+    Status = Column(String, nullable=False, default="REFUNDED")
+    Token = Column(String, nullable=False)

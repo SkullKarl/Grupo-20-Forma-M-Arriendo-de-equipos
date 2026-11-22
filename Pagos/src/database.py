@@ -6,7 +6,7 @@ url = URL(
     drivername="postgresql",
     username="admin",
     password="adminP",
-    host="localhost",
+    host="dbhost",
     port="5432",
     database="Pagos"
 )

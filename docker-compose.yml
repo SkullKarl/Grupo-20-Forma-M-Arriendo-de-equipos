@@ -1,0 +1,70 @@
+services:
+  db-pagos:
+    image: postgres:16-alpine
+    container_name: db-pagos
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: adminP
+      POSTGRES_DB: Pagos
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata_pagos:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d Pagos"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  service-pagos:
+    build: ./Pagos
+    container_name: service-pagos
+    ports:
+      - "8002:8000"
+    environment:
+      DB_USER: admin
+      DB_PASSWORD: adminP
+      DB_HOST: db-pagos
+      DB_PORT: "5432"
+      DB_NAME: Pagos
+      SIMULATE_GATEWAY_LAG: "false"
+      SIMULATE_GATEWAY_DOWN: "false"
+    depends_on:
+      db-pagos:
+        condition: service_healthy
+
+  db-entrega:
+    image: postgres:16-alpine
+    container_name: db-entrega
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: adminE
+      POSTGRES_DB: Entrega
+    ports:
+      - "5434:5432"
+    volumes:
+      - pgdata_entrega:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d Entrega"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  service-entrega:
+    build: ./Entrega
+    container_name: service-entrega
+    ports:
+      - "8003:8000"
+    environment:
+      DB_USER: admin
+      DB_PASSWORD: adminE
+      DB_HOST: db-entrega
+      DB_PORT: "5432"
+      DB_NAME: Entrega
+    depends_on:
+      db-entrega:
+        condition: service_healthy
+
+volumes:
+  pgdata_pagos:
+  pgdata_entrega:

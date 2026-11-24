@@ -59,7 +59,8 @@ async def schedule_delivery(payload: ScheduleDeliveryRequest):
 @router.get("/deliveries")
 async def list_deliveries():
     deliveries = session.query(Deliveries).all()
-    return {
+
+    return [
         {
             "Delivery_Id": d.Delivery_Id,
             "Equipment_Id": d.Equipment_Id,
@@ -67,4 +68,4 @@ async def list_deliveries():
             "Status": d.Status,
         }
         for d in deliveries
-    }
+    ]

@@ -1,4 +1,17 @@
 services:
+  service-orquestador:
+    build:
+      context: ./Orchestrator
+      dockerfile: dockerfile
+    container_name: service-orquestador
+    environment:
+      AVAILABILITY_SERVICE_URL: http://service-disponibilidad:8000
+      PAYMENTS_SERVICE_URL: http://service-pagos:8000
+      DELIVERY_SERVICE_URL: http://service-entrega:8000
+    depends_on:
+      - service-disponibilidad
+      - service-pagos
+      - service-entrega
   gateway:
     build: ./gateway
     container_name: api-gateway
@@ -42,7 +55,7 @@ services:
     ports:
       - "8001:8000"
     environment:
-      DATABASE_URL: postgresql://admin:adminD@db-disponibilidad:5432/Disponibilidad
+      DATABASE_URL: postgresql+psycopg://admin:adminD@db-disponibilidad:5432/Disponibilidad
     depends_on:
       db-disponibilidad:
         condition: service_healthy

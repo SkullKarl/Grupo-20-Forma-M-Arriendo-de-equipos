@@ -1,10 +1,13 @@
+
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field
 
-# Información para crear equipo
+
+# Informacion para crear equipo
 class EquipmentCreate(BaseModel):
     name: str = Field(min_length=2)
     description: str | None = None
+
 
 # Respuesta al consultar equipo
 class EquipmentResponse(BaseModel):
@@ -15,16 +18,33 @@ class EquipmentResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-# Información para crear reserva
+
+# Informacion para crear reserva
 class ReservationCreate(BaseModel):
     equipment_id: int
     start_date: datetime
     end_date: datetime
+    rental_id: str | None = None
+
+
+# Datos de reserva solicitados por una operacion de arriendo
+class SagaReservationCreate(BaseModel):
+    rental_id: str
+    equipment_id: int
+    start_date: datetime
+    end_date: datetime
+
+
+# Datos necesarios para liberar una reserva
+class ReservationRelease(BaseModel):
+    rental_id: str
+
 
 # Respuesta al consultar reserva
 class ReservationResponse(BaseModel):
     id: int
     equipment_id: int
+    rental_id: str | None
     start_date: datetime
     end_date: datetime
     status: str

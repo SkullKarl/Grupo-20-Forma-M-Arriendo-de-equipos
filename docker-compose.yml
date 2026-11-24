@@ -1,4 +1,13 @@
 services:
+  bff-web:
+    build: ./bff-web
+    container_name: bff-web
+    environment:
+      AVAILABILITY_URL: http://service-disponibilidad:8000
+    ports:
+      - "8004:8000"
+    depends_on:
+      - service-disponibilidad
   db-disponibilidad:
     image: postgres:16-alpine
     container_name: db_disponibilidad
@@ -17,6 +26,8 @@ services:
   service-disponibilidad:
     build: ./Disponibilidad
     container_name: service-disponibilidad
+    ports:
+      - "8001:8000"
     environment:
       DATABASE_URL: postgresql://admin:adminD@db-disponibilidad:5432/Disponibilidad
     depends_on:
@@ -30,7 +41,7 @@ services:
       POSTGRES_PASSWORD: adminP
       POSTGRES_DB: Pagos
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - pgdata_pagos:/var/lib/postgresql/data
     healthcheck:

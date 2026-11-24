@@ -15,6 +15,7 @@ services:
     environment:
       AVAILABILITY_URL: http://service-disponibilidad:8000
       DELIVERY_URL: http://service-entrega:8000
+      ORCHESTRATOR_URL: http://service-orquestador:8000
     ports:
       - "8004:8000"
     depends_on:

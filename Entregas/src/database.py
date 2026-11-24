@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 url = URL.create(
-    drivername="postgresql",
+    drivername="postgresql+psycopg2",
     username=os.getenv("DB_USER", "admin"),
     password=os.getenv("DB_PASSWORD", "adminE"),
     host=os.getenv("DB_HOST", "db-entrega"),

@@ -1,4 +1,27 @@
 services:
+  db-disponibilidad:
+    image: postgres:16-alpine
+    container_name: db_disponibilidad
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: adminD
+      POSTGRES_DB: Disponibilidad
+    volumes:
+      - pgdata_disponibilidad:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d Disponibilidad"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  service-disponibilidad:
+    build: ./Disponibilidad
+    container_name: service-disponibilidad
+    environment:
+      DATABASE_URL: postgresql://admin:adminD@db-disponibilidad:5432/Disponibilidad
+    depends_on:
+      db-disponibilidad:
+        condition: service_healthy
   db-pagos:
     image: postgres:16-alpine
     container_name: db-pagos
@@ -51,7 +74,7 @@ services:
       retries: 5
 
   service-entrega:
-    build: ./Entrega
+    build: ./Entregas
     container_name: service-entrega
     ports:
       - "8003:8000"
@@ -68,3 +91,4 @@ services:
 volumes:
   pgdata_pagos:
   pgdata_entrega:
+  pgdata_disponibilidad:

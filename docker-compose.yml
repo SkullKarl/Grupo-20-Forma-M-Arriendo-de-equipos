@@ -1,4 +1,14 @@
 services:
+  gateway:
+    build: ./gateway
+    container_name: api-gateway
+    environment:
+      BFF_URL: http://bff-web:8000
+      GATEWAY_API_TOKEN: ${GATEWAY_API_TOKEN}
+    ports:
+      - "8000:8000"
+    depends_on:
+      - bff-web
   bff-web:
     build: ./bff-web
     container_name: bff-web

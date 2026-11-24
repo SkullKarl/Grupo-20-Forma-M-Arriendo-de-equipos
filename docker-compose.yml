@@ -4,20 +4,23 @@ services:
     container_name: api-gateway
     environment:
       BFF_URL: http://bff-web:8000
-      GATEWAY_API_TOKEN: ${GATEWAY_API_TOKEN}
+      GATEWAY_API_TOKEN: ${GATEWAY_API_TOKEN:-dev-token}
     ports:
       - "8000:8000"
     depends_on:
       - bff-web
+
   bff-web:
     build: ./bff-web
     container_name: bff-web
     environment:
       AVAILABILITY_URL: http://service-disponibilidad:8000
+      ORCHESTRATOR_URL: http://service-orquestador:8000
     ports:
       - "8004:8000"
     depends_on:
       - service-disponibilidad
+
   db-disponibilidad:
     image: postgres:16-alpine
     container_name: db_disponibilidad
@@ -43,6 +46,7 @@ services:
     depends_on:
       db-disponibilidad:
         condition: service_healthy
+
   db-pagos:
     image: postgres:16-alpine
     container_name: db-pagos
@@ -51,7 +55,7 @@ services:
       POSTGRES_PASSWORD: adminP
       POSTGRES_DB: Pagos
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - pgdata_pagos:/var/lib/postgresql/data
     healthcheck:
@@ -110,15 +114,16 @@ services:
         condition: service_healthy
 
   service-orquestador:
-    build: ./Orquestador
+    build: ./Orchestrator
     container_name: service-orquestador
     ports:
-      - "8004:8000"
+      - "8005:8000"
     environment:
       AVAILABILITY_SERVICE_URL: "http://service-disponibilidad:8000"
       PAYMENTS_SERVICE_URL: "http://service-pagos:8000"
       DELIVERY_SERVICE_URL: "http://service-entrega:8000"
     depends_on:
+      - service-disponibilidad
       - service-pagos
       - service-entrega
 

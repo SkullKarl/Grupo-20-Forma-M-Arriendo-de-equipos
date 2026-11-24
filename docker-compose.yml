@@ -29,8 +29,6 @@ services:
       AVAILABILITY_URL: http://service-disponibilidad:8000
       DELIVERY_URL: http://service-entrega:8000
       ORCHESTRATOR_URL: http://service-orquestador:8000
-    ports:
-      - "8004:8000"
     depends_on:
       - service-disponibilidad
       - service-entrega
@@ -52,8 +50,6 @@ services:
   service-disponibilidad:
     build: ./Disponibilidad
     container_name: service-disponibilidad
-    ports:
-      - "8001:8000"
     environment:
       DATABASE_URL: postgresql+psycopg://admin:adminD@db-disponibilidad:5432/Disponibilidad
     depends_on:
@@ -66,8 +62,6 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: adminP
       POSTGRES_DB: Pagos
-    ports:
-      - "5432:5432"
     volumes:
       - pgdata_pagos:/var/lib/postgresql/data
     healthcheck:
@@ -79,8 +73,6 @@ services:
   service-pagos:
     build: ./Pagos
     container_name: service-pagos
-    ports:
-      - "8002:8000"
     environment:
       DB_USER: admin
       DB_PASSWORD: adminP
@@ -100,8 +92,6 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: adminE
       POSTGRES_DB: Entrega
-    ports:
-      - "5434:5432"
     volumes:
       - pgdata_entrega:/var/lib/postgresql/data
     healthcheck:
@@ -113,8 +103,6 @@ services:
   service-entrega:
     build: ./Entregas
     container_name: service-entrega
-    ports:
-      - "8003:8000"
     environment:
       DB_USER: admin
       DB_PASSWORD: adminE

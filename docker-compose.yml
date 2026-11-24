@@ -109,6 +109,19 @@ services:
       db-entrega:
         condition: service_healthy
 
+  service-orquestador:
+    build: ./Orquestador
+    container_name: service-orquestador
+    ports:
+      - "8004:8000"
+    environment:
+      AVAILABILITY_SERVICE_URL: "http://service-disponibilidad:8000"
+      PAYMENTS_SERVICE_URL: "http://service-pagos:8000"
+      DELIVERY_SERVICE_URL: "http://service-entrega:8000"
+    depends_on:
+      - service-pagos
+      - service-entrega
+
 volumes:
   pgdata_pagos:
   pgdata_entrega:

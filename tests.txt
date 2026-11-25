@@ -1,0 +1,73 @@
+1.
+curl -s -X POST "http://localhost:8000/equipments" \
+  -H "Authorization: Bearer dev-token" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "EQ-101", "description": "Equipo 101"}'
+
+curl -s -X POST "http://localhost:8000/equipments" \
+  -H "Authorization: Bearer dev-token" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "EQ-102", "description": "Equipo 102"}'
+2.
+curl -i -X POST "http://localhost:8000/sagas/rentals" \
+  -H "Authorization: Bearer dev-token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "Rental_Id": "RENT-001",
+    "Equipo_Id": "1",
+    "Buy_Order": "ORD-001",
+    "Session_Id": "SES-001",
+    "Charge": 50000,
+    "Start_Date": "2026-12-05T00:00:00Z",
+    "End_Date": "2026-12-10T00:00:00Z",
+    "Delivery_Date": "2026-12-05",
+    "Idempotency_Key": "IDEM-001"
+  }'
+curl -s -H "Authorization: Bearer dev-token" "http://localhost:8000/web/dashboard"
+3.
+
+curl -i -X POST "http://localhost:8000/sagas/rentals" \
+  -H "Authorization: Bearer dev-token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "Rental_Id": "RENT-002",
+    "Equipo_Id": "1",
+    "Buy_Order": "ORD-002",
+    "Session_Id": "SES-002",
+    "Charge": 50000,
+    "Start_Date": "2026-12-05T00:00:00Z",
+    "End_Date": "2026-12-10T00:00:00Z",
+    "Delivery_Date": "2026-12-05",
+    "Idempotency_Key": "IDEM-002"
+  }'
+4.
+curl -i -X POST "http://localhost:8000/sagas/rentals" \
+  -H "Authorization: Bearer dev-token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "Rental_Id": "RENT-003",
+    "Equipo_Id": "2",
+    "Buy_Order": "ORD-003",
+    "Session_Id": "SES-003",
+    "Charge": 75000,
+    "Start_Date": "2026-12-12T00:00:00Z",
+    "End_Date": "2026-12-15T00:00:00Z",
+    "Delivery_Date": "2026-12-12",
+    "Idempotency_Key": "IDEM-003"
+  }'
+5.
+docker compose stop service-entrega
+curl -i -X POST "http://localhost:8000/sagas/rentals" \
+  -H "Authorization: Bearer dev-token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "Rental_Id": "RENT-004",
+    "Equipo_Id": "2",
+    "Buy_Order": "ORD-004",
+    "Session_Id": "SES-004",
+    "Charge": 90000,
+    "Start_Date": "2026-12-18T00:00:00Z",
+    "End_Date": "2026-12-20T00:00:00Z",
+    "Delivery_Date": "2026-12-18",
+    "Idempotency_Key": "IDEM-004"
+  }'

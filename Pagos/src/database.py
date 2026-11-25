@@ -1,14 +1,15 @@
+import os
 from sqlalchemy.engine import URL
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-url = URL(
-    drivername="postgresql",
-    username="admin",
-    password="adminP",
-    host="dbhost",
-    port="5432",
-    database="Pagos"
+url = URL.create(
+    drivername="postgresql+psycopg2",
+    username=os.getenv("DB_USER", "admin"),
+    password=os.getenv("DB_PASSWORD", "adminP"),
+    host=os.getenv("DB_HOST", "db-pagos"),
+    port=int(os.getenv("DB_PORT", "5432")),
+    database=os.getenv("DB_NAME", "Pagos"),
 )
 
 engine = create_engine(url)

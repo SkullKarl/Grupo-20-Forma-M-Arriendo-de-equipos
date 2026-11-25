@@ -10,6 +10,8 @@ from fastapi.responses import Response
 
 # Configuración
 BFF_URL = os.getenv("BFF_URL", "http://bff-web:8000")
+ORCHESTRATOR_URL = os.getenv("ORCHESTRATOR_URL", "http://service-orquestador:8000")
+AVAILABILITY_URL = os.getenv("AVAILABILITY_URL", "http://service-disponibilidad:8000")
 GATEWAY_API_TOKEN = os.getenv("GATEWAY_API_TOKEN")
 
 # Rate Limiting: máximo de solicitudes por IP
@@ -68,7 +70,6 @@ async def verificar_rate_limit(request: Request):
 
     historial = solicitudes[ip]
 
-    # Eliminar solicitudes que ya están fuera de la ventana de tiempo
     while historial and ahora - historial[0] >= RATE_WINDOW:
         historial.popleft()
 
@@ -81,28 +82,10 @@ async def verificar_rate_limit(request: Request):
     historial.append(ahora)
 
 
-# Reenviar solicitudes al BFF
-@app.api_route(
-    "/web",
-    methods=["GET", "POST", "PUT", "PATCH", "DELETE"]
-)
-@app.api_route(
-    "/web/{path:path}",
-    methods=["GET", "POST", "PUT", "PATCH", "DELETE"]
-)
-async def redirigir_bff(
-    request: Request,
-    path: str = "",
-    authorization: str = Header(default=None)
-):
-    # 1. Autenticación
+# Función reutilizable de proxy hacia microservicios internos
+async def _reenviar(request: Request, destino: str, nombre_servicio: str, authorization: str | None):
     await validar_token(authorization)
-
-    # 2. Rate Limiting
     await verificar_rate_limit(request)
-
-    # 3. Preparar solicitud hacia el BFF
-    destino = f"{BFF_URL}/web/{path}" if path else f"{BFF_URL}/web"
 
     encabezados = {
         nombre: valor
@@ -117,7 +100,7 @@ async def redirigir_bff(
     }
 
     try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
+        async with httpx.AsyncClient(timeout=15.0) as client:
             respuesta = await client.request(
                 method=request.method,
                 url=destino,
@@ -126,7 +109,6 @@ async def redirigir_bff(
                 headers=encabezados
             )
 
-        # Evitar reenviar encabezados de transporte incompatibles
         encabezados_respuesta = {
             nombre: valor
             for nombre, valor in respuesta.headers.items()
@@ -147,5 +129,28 @@ async def redirigir_bff(
     except httpx.RequestError:
         raise HTTPException(
             status_code=503,
-            detail="No fue posible comunicarse con el BFF."
+            detail=f"No fue posible comunicarse con {nombre_servicio}."
         )
+
+
+# Reenviar solicitudes al BFF
+@app.api_route("/web", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
+@app.api_route("/web/{path:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
+async def redirigir_bff(request: Request, path: str = "", authorization: str = Header(default=None)):
+    destino = f"{BFF_URL}/web/{path}" if path else f"{BFF_URL}/web"
+    return await _reenviar(request, destino, "el BFF", authorization)
+
+
+# Reenviar solicitudes al Orquestador Saga
+@app.api_route("/sagas/{path:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
+async def redirigir_orquestador(request: Request, path: str, authorization: str = Header(default=None)):
+    destino = f"{ORCHESTRATOR_URL}/sagas/{path}"
+    return await _reenviar(request, destino, "el Orquestador", authorization)
+
+
+# Reenviar gestión de equipos a Disponibilidad
+@app.api_route("/equipments", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
+@app.api_route("/equipments/{path:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
+async def redirigir_disponibilidad(request: Request, path: str = "", authorization: str = Header(default=None)):
+    destino = f"{AVAILABILITY_URL}/equipments/{path}" if path else f"{AVAILABILITY_URL}/equipments"
+    return await _reenviar(request, destino, "Disponibilidad", authorization)

@@ -12,16 +12,23 @@ services:
       - service-disponibilidad
       - service-pagos
       - service-entrega
+
   gateway:
     build: ./gateway
     container_name: api-gateway
     environment:
       BFF_URL: http://bff-web:8000
-      GATEWAY_API_TOKEN: ${GATEWAY_API_TOKEN}
+      ORCHESTRATOR_URL: http://service-orquestador:8000
+      AVAILABILITY_URL: http://service-disponibilidad:8000
+      PAYMENTS_URL: http://service-pagos:8000
+      DELIVERY_URL: http://service-entrega:8000
+      GATEWAY_API_TOKEN: ${GATEWAY_API_TOKEN:-dev-token}
     ports:
       - "8000:8000"
     depends_on:
       - bff-web
+      - service-orquestador
+
   bff-web:
     build: ./bff-web
     container_name: bff-web
@@ -32,6 +39,7 @@ services:
     depends_on:
       - service-disponibilidad
       - service-entrega
+
   db-disponibilidad:
     image: postgres:16-alpine
     container_name: db_disponibilidad
@@ -55,6 +63,7 @@ services:
     depends_on:
       db-disponibilidad:
         condition: service_healthy
+
   db-pagos:
     image: postgres:16-alpine
     container_name: db-pagos
